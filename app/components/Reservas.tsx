@@ -8,8 +8,20 @@ export default function Reservas() {
   const [ok, setOk]           = useState(false)
   const [error, setError]     = useState('')
 
+  const validar = () => {
+    if (form.nombre.trim().length < 2) return 'El nombre debe tener al menos 2 caracteres.'
+    if (!/^\+?[\d\s\-]{7,15}$/.test(form.telefono)) return 'Teléfono inválido.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Email inválido.'
+    if (!form.fecha) return 'Selecciona una fecha.'
+    if (new Date(form.fecha) < new Date(new Date().toDateString())) return 'La fecha no puede ser en el pasado.'
+    if (!form.hora) return 'Selecciona una hora.'
+    return null
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const validErr = validar()
+    if (validErr) { setError(validErr); return }
     setLoading(true); setError('')
     const { error: err } = await supabase.from('reservas').insert([{ ...form, personas: parseInt(form.personas) }])
     if (err) setError('Hubo un error. Por favor intenta de nuevo.')

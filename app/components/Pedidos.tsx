@@ -38,9 +38,19 @@ export default function Pedidos() {
 
   const total = carrito.reduce((acc, x) => acc + x.precio * x.cantidad, 0)
 
+  const validar = () => {
+    if (carrito.length === 0) return '⚠️ Agrega algo al carrito'
+    if (form.nombre.trim().length < 2) return 'El nombre debe tener al menos 2 caracteres.'
+    if (!/^\+?[\d\s\-]{7,15}$/.test(form.telefono)) return 'Teléfono inválido.'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'Email inválido.'
+    if (form.direccion.trim().length < 5) return 'Ingresa una dirección válida.'
+    return null
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (carrito.length === 0) { showToast('⚠️ Agrega algo al carrito'); return }
+    const validErr = validar()
+    if (validErr) { showToast(validErr); return }
     setLoading(true)
     const { error } = await supabase.from('pedidos').insert([{ ...form, items: carrito, total }])
     if (!error) setOk(true)
